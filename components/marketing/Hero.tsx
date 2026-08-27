@@ -3,6 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { HeroAnimation } from "@/components/hero-animation/HeroAnimation";
+import { GolfClubGlyph } from "@/components/marketing/GolfClubGlyph";
 import { playSwingSound } from "@/lib/audio/swingSound";
 
 function scrollTo(id: string) {
@@ -24,7 +25,17 @@ export function Hero() {
           </span>
 
           <h1 className="font-display text-4xl font-semibold leading-[1.08] text-text-primary sm:text-5xl lg:text-6xl">
-            The trusted competitive network for simulated golf.
+            The trusted competitive network for simulated{" "}
+            {/* Visual "golf" swaps the l for a club glyph; a real "golf" stays in
+                the accessibility tree so screen readers/SEO see the actual word. */}
+            <span className="relative">
+              <span aria-hidden="true">
+                go
+                <GolfClubGlyph />f
+              </span>
+              <span className="sr-only">golf</span>
+            </span>
+            .
           </h1>
 
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">

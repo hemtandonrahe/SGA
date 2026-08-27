@@ -1,7 +1,7 @@
 "use client";
 
 import * as SelectPrimitive from "@radix-ui/react-select";
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 
 export const Select = SelectPrimitive.Root;
@@ -46,7 +46,21 @@ export function SelectContent({
         sideOffset={6}
         {...props}
       >
-        <SelectPrimitive.Viewport className="p-1">{children}</SelectPrimitive.Viewport>
+        <SelectPrimitive.ScrollUpButton className="flex h-6 items-center justify-center text-text-muted">
+          <ChevronUp className="size-4" />
+        </SelectPrimitive.ScrollUpButton>
+        {/* Radix exposes --radix-select-content-available-height for exactly this —
+            without capping to it, a long list (e.g. ~195 countries) can render
+            taller than the viewport with no way to reach the rest via scroll. */}
+        <SelectPrimitive.Viewport
+          className="p-1"
+          style={{ maxHeight: "var(--radix-select-content-available-height)" }}
+        >
+          {children}
+        </SelectPrimitive.Viewport>
+        <SelectPrimitive.ScrollDownButton className="flex h-6 items-center justify-center text-text-muted">
+          <ChevronDown className="size-4" />
+        </SelectPrimitive.ScrollDownButton>
       </SelectPrimitive.Content>
     </SelectPrimitive.Portal>
   );

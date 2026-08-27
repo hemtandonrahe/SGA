@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import {
+  Controller,
   useForm,
   type DefaultValues,
   type FieldValues,
@@ -14,10 +15,12 @@ import type { ZodType } from "zod";
 import { Check, Loader2 } from "lucide-react";
 import { submitWaitlistLead } from "@/lib/actions/waitlist";
 import { playSwingSound } from "@/lib/audio/swingSound";
+import { COUNTRIES, getStatesForCountry } from "@/lib/data/countries";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
 
 type CommonValues = {
   name: string;
@@ -130,14 +133,36 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="state">State / Region</Label>
-        <Input id="state" {...form.register("state" as Path<T>)} />
+        <Label>Country</Label>
+        <Controller
+          control={form.control}
+          name={"country" as Path<T>}
+          render={({ field }) => (
+            <Select
+              value={(field.value as string) || undefined}
+              onValueChange={(value) => {
+                field.onChange(value);
+                // A state picked for the previous country won't be valid for the
+                // new one — clear it rather than leave a stale/mismatched value.
+                form.setValue("state" as Path<T>, "" as never, { shouldValidate: true });
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a country" />
+              </SelectTrigger>
+              <SelectContent>
+                {COUNTRIES.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label htmlFor="country">Country</Label>
-        <Input id="country" {...form.register("country" as Path<T>)} />
-      </div>
+      <StateField form={form} />
 
       {children(form)}
 
@@ -193,5 +218,48 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
         </Button>
       </div>
     </form>
+  );
+}
+
+// Split out so `form.watch("country")` only re-renders this field, not the whole
+// form, every time the country selection changes.
+function StateField<T extends FieldValues & CommonValues>({ form }: { form: UseFormReturn<T> }) {
+  const country = form.watch("country" as Path<T>) as string | undefined;
+  const states = useMemo(() => (country ? getStatesForCountry(country) : []), [country]);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <Label>State / Region</Label>
+      <Controller
+        control={form.control}
+        name={"state" as Path<T>}
+        render={({ field }) => (
+          <Select
+            value={(field.value as string) || undefined}
+            onValueChange={field.onChange}
+            disabled={!country || states.length === 0}
+          >
+            <SelectTrigger>
+              <SelectValue
+                placeholder={
+                  !country
+                    ? "Select a country first"
+                    : states.length === 0
+                      ? "No states/regions listed"
+                      : "Select a state / region"
+                }
+              />
+            </SelectTrigger>
+            <SelectContent>
+              {states.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
+    </div>
   );
 }

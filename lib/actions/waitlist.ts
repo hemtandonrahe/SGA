@@ -74,28 +74,39 @@ export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistRe
   const input = parsed.data;
   const db = getDb();
 
-  await db
-    .insert(waitlistLeads)
-    .values({
-      role: input.role,
-      name: input.name,
-      email: input.email.toLowerCase(),
-      location: input.location || null,
-      consent: input.consent,
-      source: input.source || null,
-      details: detailsFromInput(input),
-    })
-    .onConflictDoUpdate({
-      target: waitlistLeads.email,
-      set: {
+  try {
+    await db
+      .insert(waitlistLeads)
+      .values({
+        role: input.role,
         name: input.name,
+        email: input.email.toLowerCase(),
         location: input.location || null,
         consent: input.consent,
         source: input.source || null,
         details: detailsFromInput(input),
-        updatedAt: new Date(),
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: waitlistLeads.email,
+        set: {
+          name: input.name,
+          location: input.location || null,
+          consent: input.consent,
+          source: input.source || null,
+          details: detailsFromInput(input),
+          updatedAt: new Date(),
+        },
+      });
+  } catch (err) {
+    // A raw DB error thrown from a Server Action becomes a client-side unhandled
+    // promise rejection — the form would just look like it did nothing. Surface a
+    // real (if generic) message instead, and log the actual cause server-side.
+    console.error("[waitlist] insert failed:", err);
+    return {
+      ok: false,
+      error: "Something went wrong saving your submission. Please try again in a moment.",
+    };
+  }
 
   // Best-effort, non-blocking: email delivery must never fail the actual signup.
   try {

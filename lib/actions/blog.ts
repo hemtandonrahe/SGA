@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq, ne } from "drizzle-orm";
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 import { revalidatePath } from "next/cache";
 import { getDb } from "@/lib/db";
 import { blogCategories, blogPosts } from "@/lib/db/schema";
@@ -52,7 +52,7 @@ export async function createPost(raw: unknown): Promise<BlogActionResult> {
       title: input.title,
       slug: input.slug,
       excerpt: input.excerpt || null,
-      contentHtml: DOMPurify.sanitize(input.contentHtml),
+      contentHtml: sanitizeHtml(input.contentHtml),
       coverImageUrl: input.coverImageUrl || null,
       categoryId: input.categoryId || null,
       authorUserId: admin.clerkUserId,
@@ -81,7 +81,7 @@ export async function updatePost(id: string, raw: unknown): Promise<BlogActionRe
       title: input.title,
       slug: input.slug,
       excerpt: input.excerpt || null,
-      contentHtml: DOMPurify.sanitize(input.contentHtml),
+      contentHtml: sanitizeHtml(input.contentHtml),
       coverImageUrl: input.coverImageUrl || null,
       categoryId: input.categoryId || null,
       updatedAt: new Date(),

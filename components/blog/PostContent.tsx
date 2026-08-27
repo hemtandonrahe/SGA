@@ -1,4 +1,4 @@
-// contentHtml is sanitized with DOMPurify at write time (lib/actions/blog.ts) before
+// contentHtml is sanitized with sanitize-html at write time (lib/actions/blog.ts) before
 // it ever reaches the database, so rendering it here is safe.
 export function PostContent({ html }: { html: string }) {
   return (

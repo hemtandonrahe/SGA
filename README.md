@@ -12,6 +12,7 @@ page that needs a service you haven't set up yet. Configure services one at a ti
 in any order, as you get to them.
   
 ## Quick start
+
 ```bash
 npm install
 cp .env.example .env.local

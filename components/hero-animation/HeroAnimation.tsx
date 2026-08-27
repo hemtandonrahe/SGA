@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useInView, useReducedMotion } from "framer-motion";
 import { MemberCard } from "./MemberCard";
 import { FacilityNode } from "./FacilityNode";
@@ -13,16 +13,25 @@ import { hasUserInteracted, playSwingSound } from "@/lib/audio/swingSound";
 
 const SCORE_REVEAL_STAGE = 3;
 
+function subscribeToMobileQuery(callback: () => void) {
+  const mql = window.matchMedia("(max-width: 640px)");
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+
+function getIsMobileSnapshot() {
+  return window.matchMedia("(max-width: 640px)").matches;
+}
+
+function getIsMobileServerSnapshot() {
+  return false;
+}
+
+// useSyncExternalStore (not effect+setState) is the correct way to read external,
+// possibly-SSR-mismatched browser state like matchMedia — it has a dedicated
+// server-snapshot fallback so hydration can't mismatch.
 function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mql = window.matchMedia("(max-width: 640px)");
-    setIsMobile(mql.matches);
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
-  return isMobile;
+  return useSyncExternalStore(subscribeToMobileQuery, getIsMobileSnapshot, getIsMobileServerSnapshot);
 }
 
 export function HeroAnimation() {

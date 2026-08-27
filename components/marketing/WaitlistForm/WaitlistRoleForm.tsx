@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import {
   useForm,
   type DefaultValues,
@@ -41,6 +41,7 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
 }) {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const renderedAtRef = useRef(Date.now());
 
   // zod's resolver generic plumbing doesn't infer cleanly through a generic T here
   // (TFieldValues vs TTransformedValues) — cast once at the boundary; the runtime
@@ -53,7 +54,7 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
   async function onSubmit(values: T) {
     setStatus("idle");
     setErrorMessage(null);
-    const result = await submitWaitlistLead(values);
+    const result = await submitWaitlistLead({ ...values, formRenderedAt: renderedAtRef.current });
     if (result.ok) {
       setStatus("success");
       playSwingSound();

@@ -1,36 +1,127 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SGA — Simulated Golf Association
 
-## Getting Started
+The public landing page, waitlist, and admin CMS for SGA — the trusted competitive
+network for simulated golf. Built with Next.js (App Router) + TypeScript + Tailwind,
+Neon Postgres + Drizzle ORM, Clerk (admin auth), Resend (email), and UploadThing
+(blog images).
 
-First, run the development server:
+**The app runs with zero configuration.** Every third-party integration degrades
+gracefully when its keys are missing — `npm run dev` and `npm run build` both work
+immediately after `npm install`, showing a friendly "not configured" banner on any
+page that needs a service you haven't set up yet. Configure services one at a time,
+in any order, as you get to them.
+
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000 — the landing page, hero animation, and waitlist form UI
+all work immediately. The waitlist won't actually save anything until `DATABASE_URL`
+is set (see below), and `/admin` will show a setup screen until Clerk is configured.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setting up each service
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Database — Neon Postgres
 
-## Learn More
+1. Create a project at [neon.tech](https://neon.tech).
+2. Copy the **pooled** connection string into `DATABASE_URL`, and the **direct
+   (unpooled)** connection string into `DATABASE_URL_UNPOOLED` in `.env.local`.
+   (Neon's dashboard labels these — the app uses the pooled one at runtime via
+   `@neondatabase/serverless`; `drizzle-kit` uses the unpooled one for migrations.)
+3. Run the migrations:
+   ```bash
+   npm run db:generate   # only needed after you change lib/db/schema/*
+   npm run db:migrate
+   ```
+4. Optional: `npm run db:studio` opens Drizzle Studio to browse/edit data directly.
 
-To learn more about Next.js, take a look at the following resources:
+Once `DATABASE_URL` is set, the waitlist form, admin dashboard, waitlist management,
+and blog all become functional.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Admin auth — Clerk
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Create an application at [clerk.com](https://clerk.com).
+2. Copy the publishable and secret keys into `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and
+   `CLERK_SECRET_KEY`.
+3. In the Clerk Dashboard → **Sessions** → customize the session token, add a custom
+   claim so the app can read a user's role without an extra API call:
+   ```json
+   { "metadata": "{{user.public_metadata}}" }
+   ```
+4. **Disable public sign-up** for this Clerk instance (Dashboard → User & Authentication
+   → Restrictions) — there is no public admin sign-up route in the app; staff accounts
+   are created manually.
+5. Create your own staff account in the Clerk Dashboard (Users → Create), then edit
+   its **Public metadata** to grant access:
+   ```json
+   { "role": "admin" }
+   ```
+   (`"staff"` is the other valid role — both currently have identical permissions.)
+6. Optional but recommended: set up the Clerk webhook so staff names show up on
+   waitlist notes/assignments instead of just IDs. In Clerk Dashboard → Webhooks,
+   point it at `<your-domain>/api/webhooks/clerk`, subscribe to `user.created` and
+   `user.updated`, and put the signing secret in `CLERK_WEBHOOK_SIGNING_SECRET`.
 
-## Deploy on Vercel
+Once configured, sign in at `/admin/login`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3. Email — Resend
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Create an account at [resend.com](https://resend.com) and grab an API key into
+   `RESEND_API_KEY`.
+2. Set `SGA_TEAM_NOTIFICATION_EMAIL` to where internal "new lead" emails should go.
+3. Without a verified sending domain, Resend's sandbox mode only delivers to the
+   account owner's own address — verify a domain (Resend Dashboard → Domains) and
+   update `RESEND_FROM_EMAIL` before relying on this for real signups.
+
+Email is strictly best-effort: a missing key or a Resend error never blocks a
+waitlist signup — it just skips the email and logs why.
+
+### 4. Blog cover images — UploadThing
+
+1. Create an app at [uploadthing.com](https://uploadthing.com) and copy the token
+   into `UPLOADTHING_TOKEN`.
+2. That's it — the admin blog editor's cover image uploader will start working.
+
+## Project structure
+
+```
+app/
+  page.tsx                # landing page
+  blog/, blog/[slug]/     # public blog
+  admin/
+    layout.tsx            # ClerkProvider (scoped here only — public site never needs Clerk)
+    login/, unauthorized/  # public within /admin
+    (protected)/           # route group: dashboard, waitlist, blog — gated by
+                            # app/admin/(protected)/layout.tsx + proxy.ts
+  api/
+    waitlist/export/       # CSV export
+    uploadthing/           # file router + route handler
+    webhooks/clerk/        # syncs Clerk users into staff_users
+proxy.ts                  # Next 16's renamed middleware.ts — gates /admin/*
+lib/
+  db/                      # Drizzle schema + queries
+  actions/                 # Server Actions (waitlist, blog)
+  validations/             # zod schemas
+  auth/requireAdmin.ts     # re-checked inside every admin action/route, not just proxy.ts
+  email/, uploadthing/, integrations/config.ts  # lazy clients + isXConfigured() checks
+components/
+  marketing/, hero-animation/, blog/, admin/, ui/
+```
+
+## Notes for whoever picks this up next
+
+- **This repo runs Next.js 16**, which renamed `middleware.ts` to `proxy.ts` (see
+  `proxy.ts`) among other changes — if an AI assistant or a contributor's memory of
+  Next.js predates that, point them at `node_modules/next/dist/docs/` before they
+  make routing/caching assumptions from an older version.
+- Every external client (Drizzle, Resend, Clerk, UploadThing) is instantiated lazily
+  behind an `isXConfigured()` check in `lib/integrations/config.ts` — never import
+  one of these clients eagerly at module scope without that guard, or you'll break
+  the "works with zero env vars" property.
+- `npm audit` will flag a moderate advisory in `drizzle-kit`'s dev-only esbuild
+  dependency — it's a local-CLI-only tool (not shipped to production), so this is
+  left as-is rather than downgrading `drizzle-kit` to a much older version.

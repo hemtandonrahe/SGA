@@ -1,5 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { isClerkConfigured } from "@/lib/integrations/config";
 
 // Next.js 16 renamed Middleware to Proxy; this file replaces what used to be middleware.ts.
@@ -26,7 +26,7 @@ const guardedProxy = clerkMiddleware(async (auth, req) => {
 // are until the site owner configures them. Fall back to a no-op so /admin/*
 // still renders (as a "Clerk isn't configured" page, not real admin data —
 // see app/admin/layout.tsx) instead of crashing the whole route.
-function passthroughProxy(_req: NextRequest) {
+function passthroughProxy() {
   return NextResponse.next();
 }
 

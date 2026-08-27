@@ -42,7 +42,18 @@ function detailsFromInput(input: WaitlistInput): LeadDetails {
   }
 }
 
+const MIN_SUBMIT_MS = 1500;
+
 export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistResult> {
+  // Time-trap spam guard: the client stamps when the form rendered; a real visitor
+  // can't read/fill/submit it faster than this, but a scripted bot often can.
+  // Fails the same generic way as a validation error, so it doesn't tip bots off.
+  const renderedAt = (raw as { formRenderedAt?: unknown } | null)?.formRenderedAt;
+  if (typeof renderedAt === "number" && Date.now() - renderedAt < MIN_SUBMIT_MS) {
+    console.warn("[waitlist] rejected a submission that arrived suspiciously fast");
+    return { ok: false, error: "Please check the highlighted fields." };
+  }
+
   const parsed = waitlistSchema.safeParse(raw);
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};

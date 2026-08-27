@@ -14,7 +14,6 @@ const defaultValues: PlayerWaitlistInput = {
   location: "",
   consent: false,
   source: "",
-  companyWebsite: "",
   skillLevel: undefined,
   simulatorFrequency: undefined,
   interestedInLeaguesOrTournaments: false,

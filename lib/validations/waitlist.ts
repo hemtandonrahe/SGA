@@ -8,9 +8,13 @@ const baseFields = {
     .boolean()
     .refine((v) => v === true, "You must agree to be contacted to join the waitlist"),
   source: z.string().trim().max(200).optional().or(z.literal("")),
-  // Honeypot: real visitors never fill this in — a bot filling every field will.
-  companyWebsite: z.string().max(0, "").optional().or(z.literal("")),
 };
+
+// Honeypot deliberately lives outside the react-hook-form-managed schema above: it's
+// a plain uncontrolled input (see WaitlistRoleForm), read directly off the raw
+// payload server-side in submitWaitlistLead. Keeping it out of the zod schema that
+// zodResolver validates client-side matters — a browser autofilling a stray value
+// into it must never silently block a real submission with no visible feedback.
 
 export const playerWaitlistSchema = z.object({
   role: z.literal("player"),

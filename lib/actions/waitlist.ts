@@ -45,6 +45,15 @@ function detailsFromInput(input: WaitlistInput): LeadDetails {
 const MIN_SUBMIT_MS = 1500;
 
 export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistResult> {
+  // Honeypot: a plain uncontrolled field, deliberately not part of the zod schema
+  // react-hook-form validates client-side (see lib/validations/waitlist.ts) — a
+  // non-empty value here is treated as a bot signal, never a client-blocking error.
+  const honeypot = (raw as { companyWebsite?: unknown } | null)?.companyWebsite;
+  if (typeof honeypot === "string" && honeypot.length > 0) {
+    console.warn("[waitlist] rejected a submission that filled the honeypot field");
+    return { ok: false, error: "Please check the highlighted fields." };
+  }
+
   // Time-trap spam guard: the client stamps when the form rendered; a real visitor
   // can't read/fill/submit it faster than this, but a scripted bot often can.
   // Fails the same generic way as a validation error, so it doesn't tip bots off.

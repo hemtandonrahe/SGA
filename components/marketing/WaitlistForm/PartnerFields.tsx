@@ -15,7 +15,6 @@ const defaultValues: PartnerWaitlistInput = {
   location: "",
   consent: false,
   source: "",
-  companyWebsite: "",
   company: "",
   partnerType: undefined,
   website: "",

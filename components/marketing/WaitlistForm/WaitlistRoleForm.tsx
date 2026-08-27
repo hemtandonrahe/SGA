@@ -25,7 +25,6 @@ type CommonValues = {
   location?: string;
   consent: boolean;
   source?: string;
-  companyWebsite?: string;
 };
 
 export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
@@ -42,6 +41,10 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const renderedAtRef = useRef(Date.now());
+  // Plain uncontrolled ref, deliberately NOT registered with react-hook-form — see
+  // lib/validations/waitlist.ts for why the honeypot must stay outside client-side
+  // zod validation entirely.
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   // zod's resolver generic plumbing doesn't infer cleanly through a generic T here
   // (TFieldValues vs TTransformedValues) — cast once at the boundary; the runtime
@@ -54,7 +57,11 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
   async function onSubmit(values: T) {
     setStatus("idle");
     setErrorMessage(null);
-    const result = await submitWaitlistLead({ ...values, formRenderedAt: renderedAtRef.current });
+    const result = await submitWaitlistLead({
+      ...values,
+      formRenderedAt: renderedAtRef.current,
+      companyWebsite: honeypotRef.current?.value ?? "",
+    });
     if (result.ok) {
       setStatus("success");
       playSwingSound();
@@ -123,10 +130,23 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
       {children(form)}
 
       {/* Honeypot — hidden from real visitors via CSS, not `type="hidden"`, so bots that
-          fill every visible field still trip it; screen readers skip it via aria-hidden. */}
-      <div className="absolute left-[-9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
-        <label htmlFor="companyWebsite">Leave this field empty</label>
-        <input id="companyWebsite" tabIndex={-1} autoComplete="off" {...form.register("companyWebsite" as Path<T>)} />
+          fill every visible field still trip it. `inert` (not aria-hidden) is what
+          Chrome's own devtools recommend for a hidden-but-technically-focusable
+          field: it removes the subtree from focus/accessibility entirely, which
+          also stops Chrome autofill from targeting it — aria-hidden alone doesn't,
+          and autofilling this field used to silently block real submissions since
+          it's intentionally not part of the react-hook-form/zod validation above.
+          The field name avoids anything resembling a real autofill category
+          (name/email/company/url) for the same reason. */}
+      <div className="absolute left-[-9999px] h-0 w-0 overflow-hidden" inert>
+        <label htmlFor="hp-field">Leave this field empty</label>
+        <input
+          ref={honeypotRef}
+          id="hp-field"
+          name="hp-field"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       <div className="col-span-full flex items-start gap-3 pt-1">

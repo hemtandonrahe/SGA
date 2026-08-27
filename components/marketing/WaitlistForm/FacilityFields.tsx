@@ -12,7 +12,6 @@ const defaultValues: FacilityWaitlistInput = {
   location: "",
   consent: false,
   source: "",
-  companyWebsite: "",
   facilityName: "",
   city: "",
   state: "",

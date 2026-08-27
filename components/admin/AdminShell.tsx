@@ -6,6 +6,7 @@ import { UserButton } from "@clerk/nextjs";
 import { LayoutDashboard, ListChecks, Newspaper } from "lucide-react";
 import { Logo } from "@/components/marketing/Logo";
 import { Badge } from "@/components/ui/Badge";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { cn } from "@/lib/utils/cn";
 import type { StaffRole } from "@/lib/auth/requireAdmin";
 
@@ -54,7 +55,8 @@ export function AdminShell({ role, children }: { role: StaffRole; children: Reac
           <Badge variant="accent" className="hidden sm:inline-flex">
             {role}
           </Badge>
-          <div className="ml-auto">
+          <div className="ml-auto flex items-center gap-3">
+            <ThemeToggle />
             <UserButton />
           </div>
         </header>

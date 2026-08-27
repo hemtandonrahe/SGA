@@ -36,6 +36,40 @@
   --radius-lg: 1.5rem;
 }
 
+/*
+ * Light mode. Dark is the default (:root above) and stays that way for every new
+ * visitor — this block only applies once ThemeToggle sets data-theme="light" on
+ * <html> (and persists it to localStorage). The accent hue shifts darker here
+ * (vivid neon lime reads unreadable as text/borders on white) while staying in the
+ * same lime-green family; accent-foreground flips to white since buttons are now a
+ * darker fill. Every other token keeps the same name so components never know which
+ * theme is active.
+ */
+:root[data-theme="light"] {
+  --bg-base: #ffffff;
+  --bg-raised: #f5f6f8;
+  --bg-elevated: #ffffff;
+  --bg-elevated-2: #eef0f3;
+  --border-subtle: #e5e7eb;
+  --border-strong: #d1d5db;
+
+  --text-primary: #0b0e13;
+  --text-secondary: #4b5563;
+  --text-muted: #8a93a1;
+
+  --accent: #5c8a00;
+  --accent-foreground: #ffffff;
+  --accent-soft: rgb(92 138 0 / 8%);
+  --accent-border: rgb(92 138 0 / 30%);
+
+  --accent-2: #0369a1;
+  --accent-2-soft: rgb(3 105 161 / 8%);
+
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+}
+
 @theme inline {
   --color-bg-base: var(--bg-base);
   --color-bg-raised: var(--bg-raised);
@@ -77,9 +111,14 @@ html {
   color-scheme: dark;
 }
 
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
 body {
   background: var(--bg-base);
   color: var(--text-primary);
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 ::selection {

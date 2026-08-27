@@ -11,11 +11,11 @@ try {
 // drizzle-kit runs standalone (outside the Next.js request lifecycle), so it needs
 // its own env loading. Prefer the unpooled connection string for migrations —
 // Neon's pooled endpoint can behave differently for the DDL statements drizzle-kit runs.
-const connectionString = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL;
+const connectionString = process.env.DATABASE_URL_UNPOOLED_SGA ?? process.env.DATABASE_URL_SGA;
 
 if (!connectionString) {
   throw new Error(
-    "DATABASE_URL (or DATABASE_URL_UNPOOLED) must be set to run drizzle-kit commands. Copy .env.example to .env.local first."
+    "DATABASE_URL_SGA (or DATABASE_URL_UNPOOLED_SGA) must be set to run drizzle-kit commands. Copy .env.example to .env.local first."
   );
 }
 

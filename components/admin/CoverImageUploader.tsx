@@ -20,7 +20,7 @@ export function CoverImageUploader({
   if (!configured) {
     return (
       <SetupNotice title="Image uploads aren't configured" className="p-4 text-left">
-        Add <code className="rounded bg-bg-elevated-2 px-1.5 py-0.5 text-accent">UPLOADTHING_TOKEN</code>{" "}
+        Add <code className="rounded bg-bg-elevated-2 px-1.5 py-0.5 text-accent">UPLOADTHING_TOKEN_SGA</code>{" "}
         to enable cover image uploads.
       </SetupNotice>
     );

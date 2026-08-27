@@ -67,7 +67,7 @@ export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistRe
   if (!isDbConfigured()) {
     return {
       ok: false,
-      error: "The waitlist isn't connected yet — the site owner needs to configure DATABASE_URL.",
+      error: "The waitlist isn't connected yet — the site owner needs to configure DATABASE_URL_SGA.",
     };
   }
 

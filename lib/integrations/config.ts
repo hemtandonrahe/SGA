@@ -1,5 +1,5 @@
 export function isDbConfigured(): boolean {
-  return Boolean(process.env.DATABASE_URL);
+  return Boolean(process.env.DATABASE_URL_SGA);
 }
 
 export function isClerkConfigured(): boolean {
@@ -9,9 +9,9 @@ export function isClerkConfigured(): boolean {
 }
 
 export function isResendConfigured(): boolean {
-  return Boolean(process.env.RESEND_API_KEY);
+  return Boolean(process.env.RESEND_API_KEY_SGA);
 }
 
 export function isUploadThingConfigured(): boolean {
-  return Boolean(process.env.UPLOADTHING_TOKEN);
+  return Boolean(process.env.UPLOADTHING_TOKEN_SGA);
 }

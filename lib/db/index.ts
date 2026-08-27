@@ -5,7 +5,7 @@ import * as schema from "./schema";
 
 export class DbNotConfiguredError extends Error {
   constructor() {
-    super("DATABASE_URL is not configured. Add it to .env.local — see README.md.");
+    super("DATABASE_URL_SGA is not configured. Add it to .env.local — see README.md.");
     this.name = "DbNotConfiguredError";
   }
 }
@@ -19,7 +19,7 @@ let cached: NeonHttpDatabase<typeof schema> | null = null;
 export function getDb(): NeonHttpDatabase<typeof schema> {
   if (!isDbConfigured()) throw new DbNotConfiguredError();
   if (!cached) {
-    const sql = neon(process.env.DATABASE_URL!);
+    const sql = neon(process.env.DATABASE_URL_SGA!);
     cached = drizzle(sql, { schema });
   }
   return cached;

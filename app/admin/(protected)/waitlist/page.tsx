@@ -28,7 +28,7 @@ export default async function AdminWaitlistPage({
   if (!isDbConfigured()) {
     return (
       <SetupNotice title="No database connected yet">
-        Add <code className="rounded bg-bg-elevated-2 px-1.5 py-0.5 text-accent">DATABASE_URL</code> to see
+        Add <code className="rounded bg-bg-elevated-2 px-1.5 py-0.5 text-accent">DATABASE_URL_SGA</code> to see
         real waitlist submissions here.
       </SetupNotice>
     );

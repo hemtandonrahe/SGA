@@ -20,16 +20,20 @@ npm run dev
 ```
 
 Open http://localhost:3000 — the landing page, hero animation, and waitlist form UI
-all work immediately. The waitlist won't actually save anything until `DATABASE_URL`
+all work immediately. The waitlist won't actually save anything until `DATABASE_URL_SGA`
 is set (see below), and `/admin` will show a setup screen until Clerk is configured.
+
+Most env vars below are suffixed `_SGA` so they don't collide with another project's
+vars of the same name if you share a Neon/Resend/UploadThing account across projects.
+Clerk's two keys are the one exception — see the note in `.env.example`.
 
 ## Setting up each service
 
 ### 1. Database — Neon Postgres
 
 1. Create a project at [neon.tech](https://neon.tech).
-2. Copy the **pooled** connection string into `DATABASE_URL`, and the **direct
-   (unpooled)** connection string into `DATABASE_URL_UNPOOLED` in `.env.local`.
+2. Copy the **pooled** connection string into `DATABASE_URL_SGA`, and the **direct
+   (unpooled)** connection string into `DATABASE_URL_UNPOOLED_SGA` in `.env.local`.
    (Neon's dashboard labels these — the app uses the pooled one at runtime via
    `@neondatabase/serverless`; `drizzle-kit` uses the unpooled one for migrations.)
 3. Run the migrations:
@@ -39,10 +43,15 @@ is set (see below), and `/admin` will show a setup screen until Clerk is configu
    ```
 4. Optional: `npm run db:studio` opens Drizzle Studio to browse/edit data directly.
 
-Once `DATABASE_URL` is set, the waitlist form, admin dashboard, waitlist management,
+Once `DATABASE_URL_SGA` is set, the waitlist form, admin dashboard, waitlist management,
 and blog all become functional.
 
 ### 2. Admin auth — Clerk
+
+These two keys keep Clerk's standard (unsuffixed) names on purpose — Clerk's SDK
+auto-detects them by these exact names throughout the app (middleware, every
+protected page's `auth()` call), so renaming them would need extra explicit wiring
+for no real benefit.
 
 1. Create an application at [clerk.com](https://clerk.com).
 2. Copy the publishable and secret keys into `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and
@@ -52,9 +61,9 @@ and blog all become functional.
    ```json
    { "metadata": "{{user.public_metadata}}" }
    ```
-4. **Disable public sign-up** for this Clerk instance (Dashboard → User & Authentication
-   → Restrictions) — there is no public admin sign-up route in the app; staff accounts
-   are created manually.
+4. **Restrict sign-up** for this Clerk instance: Dashboard → **User & Authentication →
+   Access mode** → select **Invite-only**. There is no public admin sign-up route in
+   the app; staff accounts are created manually (next step).
 5. Create your own staff account in the Clerk Dashboard (Users → Create), then edit
    its **Public metadata** to grant access:
    ```json
@@ -64,18 +73,19 @@ and blog all become functional.
 6. Optional but recommended: set up the Clerk webhook so staff names show up on
    waitlist notes/assignments instead of just IDs. In Clerk Dashboard → Webhooks,
    point it at `<your-domain>/api/webhooks/clerk`, subscribe to `user.created` and
-   `user.updated`, and put the signing secret in `CLERK_WEBHOOK_SIGNING_SECRET`.
+   `user.updated`, and put the signing secret in `CLERK_WEBHOOK_SIGNING_SECRET_SGA`.
 
 Once configured, sign in at `/admin/login`.
 
 ### 3. Email — Resend
 
 1. Create an account at [resend.com](https://resend.com) and grab an API key into
-   `RESEND_API_KEY`.
-2. Set `SGA_TEAM_NOTIFICATION_EMAIL` to where internal "new lead" emails should go.
+   `RESEND_API_KEY_SGA`.
+2. Set `SGA_TEAM_NOTIFICATION_EMAIL` to where internal "new lead" emails should go
+   (left unsuffixed since "SGA" is already in the name).
 3. Without a verified sending domain, Resend's sandbox mode only delivers to the
    account owner's own address — verify a domain (Resend Dashboard → Domains) and
-   update `RESEND_FROM_EMAIL` before relying on this for real signups.
+   update `RESEND_FROM_EMAIL_SGA` before relying on this for real signups.
 
 Email is strictly best-effort: a missing key or a Resend error never blocks a
 waitlist signup — it just skips the email and logs why.
@@ -83,7 +93,7 @@ waitlist signup — it just skips the email and logs why.
 ### 4. Blog cover images — UploadThing
 
 1. Create an app at [uploadthing.com](https://uploadthing.com) and copy the token
-   into `UPLOADTHING_TOKEN`.
+   into `UPLOADTHING_TOKEN_SGA`.
 2. That's it — the admin blog editor's cover image uploader will start working.
 
 ## Project structure

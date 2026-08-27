@@ -7,11 +7,11 @@ import { InternalLeadNotificationEmail } from "./templates/InternalLeadNotificat
 let cached: Resend | null = null;
 
 function getResendClient(): Resend {
-  if (!cached) cached = new Resend(process.env.RESEND_API_KEY);
+  if (!cached) cached = new Resend(process.env.RESEND_API_KEY_SGA);
   return cached;
 }
 
-const FROM = () => process.env.RESEND_FROM_EMAIL || "SGA <onboarding@resend.dev>";
+const FROM = () => process.env.RESEND_FROM_EMAIL_SGA || "SGA <onboarding@resend.dev>";
 
 export async function sendWaitlistConfirmation(params: {
   name: string;
@@ -19,7 +19,7 @@ export async function sendWaitlistConfirmation(params: {
   role: string;
 }) {
   if (!isResendConfigured()) {
-    console.info("[email] RESEND_API_KEY not set — skipping waitlist confirmation email.");
+    console.info("[email] RESEND_API_KEY_SGA not set — skipping waitlist confirmation email.");
     return;
   }
   await getResendClient().emails.send({
@@ -36,7 +36,7 @@ export async function sendInternalLeadNotification(params: {
   role: string;
 }) {
   if (!isResendConfigured()) {
-    console.info("[email] RESEND_API_KEY not set — skipping internal lead notification.");
+    console.info("[email] RESEND_API_KEY_SGA not set — skipping internal lead notification.");
     return;
   }
   const notifyEmail = process.env.SGA_TEAM_NOTIFICATION_EMAIL;

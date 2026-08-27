@@ -17,7 +17,7 @@ type ClerkUserEventData = {
 type ClerkWebhookEvent = { type: string; data: ClerkUserEventData };
 
 export async function POST(req: Request) {
-  const signingSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
+  const signingSecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET_SGA;
   if (!signingSecret) {
     return NextResponse.json({ error: "Webhook signing secret not configured" }, { status: 503 });
   }
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
   }
 
   if (!isDbConfigured()) {
-    console.warn("[clerk webhook] DATABASE_URL not set — skipping staff_users sync");
+    console.warn("[clerk webhook] DATABASE_URL_SGA not set — skipping staff_users sync");
     return NextResponse.json({ ok: true, skipped: true });
   }
 

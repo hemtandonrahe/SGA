@@ -79,10 +79,10 @@ export default async function AdminDashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Top regions</CardTitle>
+            <CardTitle>Top states/regions</CardTitle>
           </CardHeader>
           <CardContent>
-            <BarList items={metrics.byLocation.map((l) => ({ label: l.location!, value: l.total }))} />
+            <BarList items={metrics.byState.map((s) => ({ label: s.state!, value: s.total }))} />
           </CardContent>
         </Card>
 

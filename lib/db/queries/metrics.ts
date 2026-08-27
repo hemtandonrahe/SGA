@@ -6,7 +6,7 @@ import { waitlistLeads } from "@/lib/db/schema";
 export async function getWaitlistMetrics() {
   const db = getDb();
 
-  const [byRole, byStatus, bySource, byLocation, totalRows] = await Promise.all([
+  const [byRole, byStatus, bySource, byState, totalRows] = await Promise.all([
     db.select({ role: waitlistLeads.role, total: count() }).from(waitlistLeads).groupBy(waitlistLeads.role),
     db
       .select({ status: waitlistLeads.status, total: count() })
@@ -19,9 +19,9 @@ export async function getWaitlistMetrics() {
       .orderBy(desc(count()))
       .limit(8),
     db
-      .select({ location: waitlistLeads.location, total: count() })
+      .select({ state: waitlistLeads.state, total: count() })
       .from(waitlistLeads)
-      .groupBy(waitlistLeads.location)
+      .groupBy(waitlistLeads.state)
       .orderBy(desc(count()))
       .limit(8),
     db.select({ total: count() }).from(waitlistLeads),
@@ -38,7 +38,7 @@ export async function getWaitlistMetrics() {
     byRole,
     byStatus,
     bySource: bySource.filter((s) => s.source),
-    byLocation: byLocation.filter((l) => l.location),
+    byState: byState.filter((s) => s.state),
     conversionRate,
   };
 }

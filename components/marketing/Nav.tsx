@@ -13,7 +13,7 @@ import { playSwingSound } from "@/lib/audio/swingSound";
 // navigates home first, then scrolls to the section, from any page.
 const links = [
   { href: "/#how-it-works", label: "How it works" },
-  { href: "/#who-its-for", label: "Who it's for" },
+  { href: "/#who-its-for", label: "Who Is it for?" },
   { href: "/blog", label: "Blog" },
 ];
 

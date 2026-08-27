@@ -25,8 +25,8 @@ function detailsFromInput(input: WaitlistInput): LeadDetails {
     case "facility":
       return {
         facilityName: input.facilityName,
-        city: input.city || undefined,
-        state: input.state || undefined,
+        city: input.facilityCity || undefined,
+        state: input.facilityState || undefined,
         numberOfBays: input.numberOfBays,
         currentSimulatorTech: input.currentSimulatorTech || undefined,
         contactName: input.contactName || undefined,
@@ -90,7 +90,9 @@ export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistRe
         role: input.role,
         name: input.name,
         email: input.email.toLowerCase(),
-        location: input.location || null,
+        city: input.city || null,
+        state: input.state || null,
+        country: input.country || null,
         consent: input.consent,
         source: input.source || null,
         details: detailsFromInput(input),
@@ -99,7 +101,9 @@ export async function submitWaitlistLead(raw: unknown): Promise<SubmitWaitlistRe
         target: waitlistLeads.email,
         set: {
           name: input.name,
-          location: input.location || null,
+          city: input.city || null,
+          state: input.state || null,
+          country: input.country || null,
           consent: input.consent,
           source: input.source || null,
           details: detailsFromInput(input),

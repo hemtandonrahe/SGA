@@ -55,8 +55,16 @@ export default async function LeadDetailPage({
             <CardContent>
               <dl className="mb-6 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">Location</dt>
-                  <dd className="mt-0.5 text-sm text-text-primary">{lead.location || "—"}</dd>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">City</dt>
+                  <dd className="mt-0.5 text-sm text-text-primary">{lead.city || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">State / Region</dt>
+                  <dd className="mt-0.5 text-sm text-text-primary">{lead.state || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">Country</dt>
+                  <dd className="mt-0.5 text-sm text-text-primary">{lead.country || "—"}</dd>
                 </div>
                 <div>
                   <dt className="text-xs font-medium uppercase tracking-wide text-text-muted">Source</dt>

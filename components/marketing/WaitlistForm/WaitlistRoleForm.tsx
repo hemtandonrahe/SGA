@@ -22,7 +22,9 @@ import { Checkbox } from "@/components/ui/Checkbox";
 type CommonValues = {
   name: string;
   email: string;
-  location?: string;
+  city?: string;
+  state?: string;
+  country?: string;
   consent: boolean;
   source?: string;
 };
@@ -123,8 +125,18 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor="location">Location (city, state/country)</Label>
-        <Input id="location" {...form.register("location" as Path<T>)} />
+        <Label htmlFor="city">City</Label>
+        <Input id="city" {...form.register("city" as Path<T>)} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="state">State / Region</Label>
+        <Input id="state" {...form.register("state" as Path<T>)} />
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="country">Country</Label>
+        <Input id="country" {...form.register("country" as Path<T>)} />
       </div>
 
       {children(form)}

@@ -26,13 +26,15 @@ export async function GET(req: NextRequest) {
   });
 
   const csv = toCsv(
-    ["Name", "Email", "Role", "Status", "Location", "Source", "Consent", "Details", "Created At"],
+    ["Name", "Email", "Role", "Status", "City", "State", "Country", "Source", "Consent", "Details", "Created At"],
     rows.map((r) => [
       r.name,
       r.email,
       r.role,
       r.status,
-      r.location ?? "",
+      r.city ?? "",
+      r.state ?? "",
+      r.country ?? "",
       r.source ?? "",
       r.consent ? "yes" : "no",
       JSON.stringify(r.details ?? {}),

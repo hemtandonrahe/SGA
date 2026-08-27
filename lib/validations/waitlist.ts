@@ -3,7 +3,9 @@ import { z } from "zod";
 const baseFields = {
   name: z.string().trim().min(1, "Name is required").max(200),
   email: z.string().trim().min(1, "Email is required").email("Enter a valid email"),
-  location: z.string().trim().max(200).optional().or(z.literal("")),
+  city: z.string().trim().max(200).optional().or(z.literal("")),
+  state: z.string().trim().max(200).optional().or(z.literal("")),
+  country: z.string().trim().max(200).optional().or(z.literal("")),
   consent: z
     .boolean()
     .refine((v) => v === true, "You must agree to be contacted to join the waitlist"),
@@ -30,8 +32,11 @@ export const facilityWaitlistSchema = z.object({
   role: z.literal("facility"),
   ...baseFields,
   facilityName: z.string().trim().min(1, "Facility name is required").max(200),
-  city: z.string().trim().max(200).optional().or(z.literal("")),
-  state: z.string().trim().max(200).optional().or(z.literal("")),
+  // Prefixed to disambiguate from the submitter's own city/state in baseFields —
+  // a facility submission needs both (the facility's location can differ from the
+  // submitter's).
+  facilityCity: z.string().trim().max(200).optional().or(z.literal("")),
+  facilityState: z.string().trim().max(200).optional().or(z.literal("")),
   numberOfBays: z.coerce.number().int().min(0).max(1000).optional(),
   currentSimulatorTech: z.string().trim().max(500).optional().or(z.literal("")),
   contactName: z.string().trim().max(200).optional().or(z.literal("")),

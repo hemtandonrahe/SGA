@@ -32,7 +32,7 @@ export function AudienceSection() {
     <section id="who-its-for" className="border-y border-border-subtle bg-bg-raised">
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="mb-14 max-w-2xl">
-          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-accent-2">Who it&apos;s for</p>
+          <p className="mb-3 text-sm font-medium uppercase tracking-widest text-accent-2">Who Is it for?</p>
           <h2 className="font-display text-3xl font-semibold text-text-primary sm:text-4xl">
             Everyone in simulated golf, on the same network.
           </h2>

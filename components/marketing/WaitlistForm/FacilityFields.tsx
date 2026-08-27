@@ -9,12 +9,14 @@ const defaultValues: FacilityWaitlistInput = {
   role: "facility",
   name: "",
   email: "",
-  location: "",
+  city: "",
+  state: "",
+  country: "",
   consent: false,
   source: "",
   facilityName: "",
-  city: "",
-  state: "",
+  facilityCity: "",
+  facilityState: "",
   numberOfBays: undefined,
   currentSimulatorTech: "",
   contactName: "",
@@ -44,13 +46,13 @@ export function FacilityWaitlistForm() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="city">City</Label>
-            <Input id="city" {...form.register("city")} />
+            <Label htmlFor="facilityCity">Facility city</Label>
+            <Input id="facilityCity" {...form.register("facilityCity")} />
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="state">State / region</Label>
-            <Input id="state" {...form.register("state")} />
+            <Label htmlFor="facilityState">Facility state / region</Label>
+            <Input id="facilityState" {...form.register("facilityState")} />
           </div>
 
           <div className="flex flex-col gap-1.5 sm:col-span-2">

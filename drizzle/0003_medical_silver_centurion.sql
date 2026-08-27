@@ -1,0 +1,1 @@
+ALTER TABLE "waitlist_leads" DROP COLUMN "location";

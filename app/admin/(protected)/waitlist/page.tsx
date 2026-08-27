@@ -9,6 +9,10 @@ import type { WaitlistLead } from "@/lib/db/schema";
 
 const PAGE_SIZE = 25;
 
+function formatLocation(lead: Pick<WaitlistLead, "city" | "state" | "country">) {
+  return [lead.city, lead.state, lead.country].filter(Boolean).join(", ") || "—";
+}
+
 function parseFilters(sp: Record<string, string | string[] | undefined>): LeadFilters {
   const role = typeof sp.role === "string" && sp.role ? (sp.role as WaitlistLead["role"]) : undefined;
   const status = typeof sp.status === "string" && sp.status ? (sp.status as WaitlistLead["status"]) : undefined;
@@ -96,7 +100,7 @@ export default async function AdminWaitlistPage({
                 <td className="px-4 py-3">
                   <StatusBadge status={lead.status} />
                 </td>
-                <td className="px-4 py-3 text-text-secondary">{lead.location || "—"}</td>
+                <td className="px-4 py-3 text-text-secondary">{formatLocation(lead)}</td>
                 <td className="px-4 py-3 text-text-secondary">{lead.source || "—"}</td>
                 <td className="px-4 py-3 text-text-muted">
                   {new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(lead.createdAt)}

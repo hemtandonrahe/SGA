@@ -1,5 +1,4 @@
 import { boolean, index, integer, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
-import { staffUsers } from "./staff";
 
 export const blogCategories = pgTable("blog_categories", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -17,9 +16,8 @@ export const blogPosts = pgTable(
     contentHtml: text("content_html").notNull().default(""),
     coverImageUrl: text("cover_image_url"),
     categoryId: uuid("category_id").references(() => blogCategories.id, { onDelete: "set null" }),
-    authorUserId: text("author_user_id").references(() => staffUsers.clerkUserId, {
-      onDelete: "set null",
-    }),
+    // No FK to staff_users — same reasoning as lib/db/schema/waitlist.ts.
+    authorUserId: text("author_user_id"),
     isPublished: boolean("is_published").notNull().default(false),
     isFeatured: boolean("is_featured").notNull().default(false),
     publishedAt: timestamp("published_at", { withTimezone: true }),

@@ -70,9 +70,12 @@ for no real benefit.
    { "role": "admin" }
    ```
    (`"staff"` is the other valid role — both currently have identical permissions.)
-6. Optional but recommended: set up the Clerk webhook so staff names show up on
-   waitlist notes/assignments instead of just IDs. In Clerk Dashboard → Webhooks,
-   point it at `<your-domain>/api/webhooks/clerk`, subscribe to `user.created` and
+6. Optional: `requireAdmin()` already self-syncs the signed-in user into `staff_users`
+   on every admin action, so real names show up on notes/assignments without any
+   extra setup. Configuring the Clerk webhook on top of that just makes the sync
+   happen the moment a profile changes in Clerk, rather than on that user's next
+   admin action. In Clerk Dashboard → Webhooks, point it at
+   `<your-domain>/api/webhooks/clerk`, subscribe to `user.created` and
    `user.updated`, and put the signing secret in `CLERK_WEBHOOK_SIGNING_SECRET_SGA`.
 
 Once configured, sign in at `/admin/login`.

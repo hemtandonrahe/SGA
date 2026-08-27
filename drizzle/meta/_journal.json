@@ -8,6 +8,13 @@
       "when": 1787795247859,
       "tag": "0000_parched_scream",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1787814417187,
+      "tag": "0001_funny_puff_adder",
+      "breakpoints": true
     }
   ]
 }

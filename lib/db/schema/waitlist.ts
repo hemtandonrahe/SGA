@@ -8,7 +8,6 @@ import {
   timestamp,
   uuid,
 } from "drizzle-orm/pg-core";
-import { staffUsers } from "./staff";
 
 export const leadRoleEnum = pgEnum("lead_role", ["player", "facility", "partner"]);
 export const leadStatusEnum = pgEnum("lead_status", [
@@ -62,9 +61,10 @@ export const waitlistLeads = pgTable(
     consent: boolean("consent").notNull().default(false),
     source: text("source"),
     status: leadStatusEnum("status").notNull().default("new"),
-    assignedToUserId: text("assigned_to_user_id").references(() => staffUsers.clerkUserId, {
-      onDelete: "set null",
-    }),
+    // No FK to staff_users on purpose: this is a display-only mirror of Clerk's
+    // identity (see lib/db/schema/staff.ts), populated best-effort by requireAdmin()
+    // and the Clerk webhook — it must never be the reason a write fails.
+    assignedToUserId: text("assigned_to_user_id"),
     followUpDueAt: timestamp("follow_up_due_at", { withTimezone: true }),
     details: jsonb("details").notNull().default({}).$type<LeadDetails>(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -82,9 +82,7 @@ export const leadNotes = pgTable("lead_notes", {
   leadId: uuid("lead_id")
     .notNull()
     .references(() => waitlistLeads.id, { onDelete: "cascade" }),
-  authorUserId: text("author_user_id").references(() => staffUsers.clerkUserId, {
-    onDelete: "set null",
-  }),
+  authorUserId: text("author_user_id"),
   body: text("body").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
@@ -96,9 +94,7 @@ export const leadStatusHistory = pgTable("lead_status_history", {
     .references(() => waitlistLeads.id, { onDelete: "cascade" }),
   oldStatus: leadStatusEnum("old_status"),
   newStatus: leadStatusEnum("new_status").notNull(),
-  changedByUserId: text("changed_by_user_id").references(() => staffUsers.clerkUserId, {
-    onDelete: "set null",
-  }),
+  changedByUserId: text("changed_by_user_id"),
   changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

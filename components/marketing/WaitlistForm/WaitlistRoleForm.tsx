@@ -20,7 +20,9 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { Combobox } from "@/components/ui/Combobox";
+
+const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.name, label: c.name }));
 
 type CommonValues = {
   name: string;
@@ -138,7 +140,7 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
           control={form.control}
           name={"country" as Path<T>}
           render={({ field }) => (
-            <Select
+            <Combobox
               value={(field.value as string) || undefined}
               onValueChange={(value) => {
                 field.onChange(value);
@@ -146,18 +148,11 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
                 // new one — clear it rather than leave a stale/mismatched value.
                 form.setValue("state" as Path<T>, "" as never, { shouldValidate: true });
               }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a country" />
-              </SelectTrigger>
-              <SelectContent>
-                {COUNTRIES.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={COUNTRY_OPTIONS}
+              placeholder="Select a country"
+              searchPlaceholder="Search countries…"
+              emptyText="No country found."
+            />
           )}
         />
       </div>
@@ -225,7 +220,10 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
 // form, every time the country selection changes.
 function StateField<T extends FieldValues & CommonValues>({ form }: { form: UseFormReturn<T> }) {
   const country = form.watch("country" as Path<T>) as string | undefined;
-  const states = useMemo(() => (country ? getStatesForCountry(country) : []), [country]);
+  const stateOptions = useMemo(
+    () => (country ? getStatesForCountry(country).map((s) => ({ value: s, label: s })) : []),
+    [country]
+  );
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -234,30 +232,21 @@ function StateField<T extends FieldValues & CommonValues>({ form }: { form: UseF
         control={form.control}
         name={"state" as Path<T>}
         render={({ field }) => (
-          <Select
+          <Combobox
             value={(field.value as string) || undefined}
             onValueChange={field.onChange}
-            disabled={!country || states.length === 0}
-          >
-            <SelectTrigger>
-              <SelectValue
-                placeholder={
-                  !country
-                    ? "Select a country first"
-                    : states.length === 0
-                      ? "No states/regions listed"
-                      : "Select a state / region"
-                }
-              />
-            </SelectTrigger>
-            <SelectContent>
-              {states.map((s) => (
-                <SelectItem key={s} value={s}>
-                  {s}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            options={stateOptions}
+            disabled={!country || stateOptions.length === 0}
+            placeholder={
+              !country
+                ? "Select a country first"
+                : stateOptions.length === 0
+                  ? "No states/regions listed"
+                  : "Select a state / region"
+            }
+            searchPlaceholder="Search states/regions…"
+            emptyText="No state/region found."
+          />
         )}
       />
     </div>

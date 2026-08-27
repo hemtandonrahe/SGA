@@ -14,7 +14,7 @@ const defaultValues: PartnerWaitlistInput = {
   email: "",
   city: "",
   state: "",
-  country: "",
+  country: "United States",
   consent: false,
   source: "",
   company: "",

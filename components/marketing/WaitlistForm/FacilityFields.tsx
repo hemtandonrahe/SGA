@@ -11,7 +11,7 @@ const defaultValues: FacilityWaitlistInput = {
   email: "",
   city: "",
   state: "",
-  country: "",
+  country: "United States",
   consent: false,
   source: "",
   facilityName: "",

@@ -13,7 +13,7 @@ export function Footer() {
           <Link href="/blog" className="hover:text-text-primary">
             Blog
           </Link>
-          <Link href="#waitlist" className="hover:text-text-primary">
+          <Link href="/#waitlist" className="hover:text-text-primary">
             Join the waitlist
           </Link>
         </nav>

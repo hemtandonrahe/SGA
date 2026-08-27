@@ -5,6 +5,12 @@
 // (a CTA, a form submit) is itself a gesture and plays immediately either way;
 // the hero animation's autonomous loop is not, so it stays silent until this
 // flips true, then plays on every loop for the rest of the visit.
+//
+// True "plays the instant the page loads" isn't something any browser allows for
+// unmuted audio — there's no way around that. The closest equivalent: this also
+// plays the sound once, immediately, on the very first interaction of any kind
+// anywhere on the page (a click on a nav link, a random tap, anything) — not just
+// the specific buttons that already call playSwingSound() directly.
 const SWING_SOUND_SRC = "/sounds/swing.mp3";
 
 let sharedAudio: HTMLAudioElement | null = null;
@@ -20,9 +26,23 @@ function getAudio(): HTMLAudioElement | null {
   return sharedAudio;
 }
 
+function playNow() {
+  const audio = getAudio();
+  if (!audio) return;
+  try {
+    audio.currentTime = 0;
+    void audio.play().catch(() => {
+      // Blocked by autoplay policy — fine, it's a nice-to-have, not required.
+    });
+  } catch {
+    // Ignore — same reasoning as above.
+  }
+}
+
 if (typeof window !== "undefined") {
   const unlock = () => {
     interacted = true;
+    playNow();
     window.removeEventListener("pointerdown", unlock);
     window.removeEventListener("keydown", unlock);
   };
@@ -35,14 +55,5 @@ export function hasUserInteracted() {
 }
 
 export function playSwingSound() {
-  const audio = getAudio();
-  if (!audio) return;
-  try {
-    audio.currentTime = 0;
-    void audio.play().catch(() => {
-      // Blocked by autoplay policy — fine, it's a nice-to-have, not required.
-    });
-  } catch {
-    // Ignore — same reasoning as above.
-  }
+  playNow();
 }

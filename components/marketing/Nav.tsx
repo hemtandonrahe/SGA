@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { playSwingSound } from "@/lib/audio/swingSound";
 
+// Leading "/" matters: a bare "#how-it-works" only scrolls within the current page,
+// so from /blog (which has no such element) clicking it did nothing. "/#..." always
+// navigates home first, then scrolls to the section, from any page.
 const links = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#who-its-for", label: "Who it's for" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#who-its-for", label: "Who it's for" },
   { href: "/blog", label: "Blog" },
 ];
 

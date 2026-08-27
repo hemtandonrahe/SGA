@@ -3,7 +3,7 @@
 The public landing page, waitlist, and admin CMS for SGA — the trusted competitive
 network for simulated golf. Built with Next.js (App Router) + TypeScript + Tailwind,
 Neon Postgres + Drizzle ORM, Clerk (admin auth), Resend (email), and UploadThing
-(blog images).
+(blog images)
 
 **The app runs with zero configuration.** Every third-party integration degrades
 gracefully when its keys are missing — `npm run dev` and `npm run build` both work

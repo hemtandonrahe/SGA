@@ -10,7 +10,7 @@ gracefully when its keys are missing — `npm run dev` and `npm run build` both 
 immediately after `npm install`, showing a friendly "not configured" banner on any
 page that needs a service you haven't set up yet. Configure services one at a time,
 in any order, as you get to them.
- 
+  
 ## Quick start
 ```bash
 npm install

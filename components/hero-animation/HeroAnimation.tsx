@@ -9,6 +9,9 @@ import { ScoreReveal } from "./ScoreReveal";
 import { RankingTicker } from "./RankingTicker";
 import { Connector } from "./Connector";
 import { STAGE_COUNT, phaseFor, useHeroSequence } from "./useHeroSequence";
+import { hasUserInteracted, playSwingSound } from "@/lib/audio/swingSound";
+
+const SCORE_REVEAL_STAGE = 3;
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
@@ -37,6 +40,14 @@ export function HeroAnimation() {
 
   const paused = Boolean(prefersReducedMotion) || !inView || tabHidden;
   const activeStep = useHeroSequence(paused);
+
+  // Ties the swing sound to "the swing that produced the verified score" — only once
+  // the visitor has interacted with the page at least once (browser autoplay policy).
+  useEffect(() => {
+    if (activeStep === SCORE_REVEAL_STAGE && hasUserInteracted()) {
+      playSwingSound();
+    }
+  }, [activeStep]);
 
   // Reduced motion: skip the loop entirely and render the fully "arrived" end state —
   // the headline/CTA next to it remain the real content either way.

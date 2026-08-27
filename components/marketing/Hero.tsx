@@ -3,6 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { HeroAnimation } from "@/components/hero-animation/HeroAnimation";
+import { playSwingSound } from "@/lib/audio/swingSound";
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -33,7 +34,7 @@ export function Hero() {
           </p>
 
           <div className="mt-9 flex flex-wrap gap-4">
-            <Button size="lg" onClick={() => scrollTo("waitlist")}>
+            <Button size="lg" onClick={() => { playSwingSound(); scrollTo("waitlist"); }}>
               Join the waitlist
             </Button>
             <Button size="lg" variant="secondary" onClick={() => scrollTo("how-it-works")}>

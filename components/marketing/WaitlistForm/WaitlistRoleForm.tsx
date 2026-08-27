@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { ZodType } from "zod";
 import { Check, Loader2 } from "lucide-react";
 import { submitWaitlistLead } from "@/lib/actions/waitlist";
+import { playSwingSound } from "@/lib/audio/swingSound";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -55,6 +56,7 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
     const result = await submitWaitlistLead(values);
     if (result.ok) {
       setStatus("success");
+      playSwingSound();
       form.reset(defaultValues);
       return;
     }

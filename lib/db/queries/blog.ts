@@ -3,34 +3,40 @@ import { and, desc, eq, sql } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { blogCategories, blogPosts } from "@/lib/db/schema";
 
-export async function listPublishedPosts() {
+function withCategory() {
   const db = getDb();
   return db
-    .select()
+    .select({ post: blogPosts, categoryName: blogCategories.name })
     .from(blogPosts)
-    .where(eq(blogPosts.isPublished, true))
-    .orderBy(desc(blogPosts.publishedAt));
+    .leftJoin(blogCategories, eq(blogPosts.categoryId, blogCategories.id));
 }
 
-export async function getFeaturedPost() {
-  const db = getDb();
-  const [post] = await db
-    .select()
-    .from(blogPosts)
+function flatten<T extends { post: typeof blogPosts.$inferSelect; categoryName: string | null }>(row: T) {
+  return { ...row.post, categoryName: row.categoryName };
+}
+
+export type PostWithCategory = ReturnType<typeof flatten>;
+
+export async function listPublishedPosts(): Promise<PostWithCategory[]> {
+  const rows = await withCategory()
+    .where(eq(blogPosts.isPublished, true))
+    .orderBy(desc(blogPosts.publishedAt));
+  return rows.map(flatten);
+}
+
+export async function getFeaturedPost(): Promise<PostWithCategory | null> {
+  const [row] = await withCategory()
     .where(and(eq(blogPosts.isPublished, true), eq(blogPosts.isFeatured, true)))
     .orderBy(desc(blogPosts.publishedAt))
     .limit(1);
-  return post ?? null;
+  return row ? flatten(row) : null;
 }
 
-export async function getPublishedPostBySlug(slug: string) {
-  const db = getDb();
-  const [post] = await db
-    .select()
-    .from(blogPosts)
+export async function getPublishedPostBySlug(slug: string): Promise<PostWithCategory | null> {
+  const [row] = await withCategory()
     .where(and(eq(blogPosts.slug, slug), eq(blogPosts.isPublished, true)))
     .limit(1);
-  return post ?? null;
+  return row ? flatten(row) : null;
 }
 
 export async function incrementPostViewCount(id: string) {

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
 /**
@@ -21,11 +22,19 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, markClassName }: { className?: string; markClassName?: string }) {
+// The real logo is a JPG on a solid white background — rather than fight that on a
+// dark theme, it sits inside its own white badge everywhere it appears.
+export function Logo({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5 text-text-primary", className)}>
-      <LogoMark className={cn("text-accent", markClassName)} />
-      <span className="font-display text-lg font-semibold tracking-tight">SGA</span>
+    <span className={cn("inline-flex items-center rounded-md bg-white px-3 py-1.5", className)}>
+      <Image
+        src="/logo/sga-logo-cropped.png"
+        alt="SGA — Simulated Golf Association"
+        width={672}
+        height={272}
+        priority
+        className="h-6 w-auto sm:h-7"
+      />
     </span>
   );
 }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "@/components/ui/Button";
+import { playSwingSound } from "@/lib/audio/swingSound";
 
 const links = [
   { href: "#how-it-works", label: "How it works" },
@@ -35,7 +36,7 @@ export function Nav() {
         </nav>
 
         <div className="hidden md:block">
-          <Button size="sm" onClick={() => scrollToWaitlist()}>
+          <Button size="sm" onClick={() => { playSwingSound(); scrollToWaitlist(); }}>
             Join the waitlist
           </Button>
         </div>
@@ -65,6 +66,7 @@ export function Nav() {
             size="sm"
             className="mt-2"
             onClick={() => {
+              playSwingSound();
               setOpen(false);
               scrollToWaitlist();
             }}

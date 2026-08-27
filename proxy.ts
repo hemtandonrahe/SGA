@@ -32,6 +32,13 @@ function passthroughProxy() {
 
 export default isClerkConfigured() ? guardedProxy : passthroughProxy;
 
+// clerkMiddleware() must run on every route that calls auth() downstream — not just
+// /admin/* pages, but also the standalone API routes that call requireAdmin()
+// (r2-upload, waitlist export). Server Actions don't need listing here since they
+// POST to the current page's URL, which is already under /admin/*; these two are
+// separate fetch()/link targets, so they need their own explicit matcher entries.
+// (isProtectedAdminRoute above stays scoped to /admin/* — these two handle their
+// own 401 JSON responses via requireAdmin(), they should never get redirected.)
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/r2-upload", "/api/waitlist/export"],
 };

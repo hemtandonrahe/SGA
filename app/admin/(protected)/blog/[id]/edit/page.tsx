@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getPostById, listCategories } from "@/lib/db/queries/blog";
-import { isDbConfigured, isUploadThingConfigured } from "@/lib/integrations/config";
+import { isDbConfigured, isR2Configured } from "@/lib/integrations/config";
 import { SetupNotice } from "@/components/ui/SetupNotice";
 import { BlogPostForm } from "@/components/admin/BlogPostForm";
 import { Badge } from "@/components/ui/Badge";
@@ -30,7 +30,7 @@ export default async function EditBlogPostPage({
         <h1 className="font-display text-2xl font-semibold text-text-primary">Edit post</h1>
         <Badge variant={post.isPublished ? "success" : "neutral"}>{post.isPublished ? "Published" : "Draft"}</Badge>
       </div>
-      <BlogPostForm post={post} categories={categories} uploadThingConfigured={isUploadThingConfigured()} />
+      <BlogPostForm post={post} categories={categories} imageUploadConfigured={isR2Configured()} />
     </div>
   );
 }

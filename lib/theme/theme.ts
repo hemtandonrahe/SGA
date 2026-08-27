@@ -3,6 +3,7 @@
 // and client components (ThemeToggle). getStoredTheme/applyTheme touch the DOM
 // directly, so they're only ever actually called from inside client code.
 const STORAGE_KEY = "sga-theme";
+const CHANGE_EVENT = "sga-theme-change";
 
 export type Theme = "light" | "dark";
 
@@ -18,6 +19,17 @@ export function getStoredTheme(): Theme {
   }
 }
 
+// Always "dark" — matches what the server (and thus the initial client render,
+// before useSyncExternalStore corrects it) has no way to know otherwise.
+export function getServerTheme(): Theme {
+  return "dark";
+}
+
+export function subscribeToThemeChange(callback: () => void) {
+  window.addEventListener(CHANGE_EVENT, callback);
+  return () => window.removeEventListener(CHANGE_EVENT, callback);
+}
+
 export function applyTheme(theme: Theme) {
   document.documentElement.setAttribute("data-theme", theme);
   try {
@@ -25,6 +37,7 @@ export function applyTheme(theme: Theme) {
   } catch {
     // Private browsing / storage blocked — theme still applies for this page view.
   }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export const themeInitScript = `(function(){try{var t=localStorage.getItem('${STORAGE_KEY}');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`;

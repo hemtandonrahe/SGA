@@ -1,27 +1,21 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
-import { applyTheme, getStoredTheme, type Theme } from "@/lib/theme/theme";
+import { applyTheme, getServerTheme, getStoredTheme, subscribeToThemeChange } from "@/lib/theme/theme";
 import { cn } from "@/lib/utils/cn";
 
 export function ThemeToggle({ className }: { className?: string }) {
-  const [theme, setTheme] = useState<Theme>("dark");
-
-  // useLayoutEffect (not useEffect) so this runs before paint. It also re-applies
-  // the stored value defensively: in dev, React Strict Mode's remount clears the
-  // data-theme attribute the inline script (app/layout.tsx) set during HTML
-  // parsing — a no-op in production, where that attribute is already correct.
-  useLayoutEffect(() => {
-    const stored = getStoredTheme();
-    applyTheme(stored);
-    setTheme(stored);
-  }, []);
+  // useSyncExternalStore (not effect+setState) is the correct way to read/subscribe
+  // to external state like localStorage — getServerTheme keeps SSR/hydration in
+  // sync, and React itself corrects the client value right after hydration. No
+  // effect needed here: the inline script (app/layout.tsx) already applies the
+  // stored theme to the DOM before paint, and toggle() below is the only thing
+  // that should ever write to it afterward.
+  const theme = useSyncExternalStore(subscribeToThemeChange, getStoredTheme, getServerTheme);
 
   function toggle() {
-    const next = theme === "dark" ? "light" : "dark";
-    applyTheme(next);
-    setTheme(next);
+    applyTheme(theme === "dark" ? "light" : "dark");
   }
 
   return (

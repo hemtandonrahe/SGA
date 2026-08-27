@@ -17,11 +17,11 @@ import type { BlogCategory, BlogPost } from "@/lib/db/schema";
 export function BlogPostForm({
   post,
   categories,
-  uploadThingConfigured,
+  imageUploadConfigured,
 }: {
   post?: BlogPost;
   categories: BlogCategory[];
-  uploadThingConfigured: boolean;
+  imageUploadConfigured: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -116,7 +116,7 @@ export function BlogPostForm({
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">
           <Label>Cover image</Label>
-          <CoverImageUploader configured={uploadThingConfigured} value={coverImageUrl} onChange={setCoverImageUrl} />
+          <CoverImageUploader configured={imageUploadConfigured} value={coverImageUrl} onChange={setCoverImageUrl} />
         </div>
 
         <div className="flex flex-col gap-1.5 sm:col-span-2">

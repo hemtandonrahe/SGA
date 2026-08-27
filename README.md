@@ -2,7 +2,7 @@
 
 The public landing page, waitlist, and admin CMS for SGA — the trusted competitive
 network for simulated golf. Built with Next.js (App Router) + TypeScript + Tailwind,
-Neon Postgres + Drizzle ORM, Clerk (admin auth), Resend (email), and UploadThing
+Neon Postgres + Drizzle ORM, Clerk (admin auth), Resend (email), and Cloudflare R2
 (blog images).
 
 **The app runs with zero configuration.** Every third-party integration degrades
@@ -24,7 +24,7 @@ all work immediately. The waitlist won't actually save anything until `DATABASE_
 is set (see below), and `/admin` will show a setup screen until Clerk is configured.
 
 Most env vars below are suffixed `_SGA` so they don't collide with another project's
-vars of the same name if you share a Neon/Resend/UploadThing account across projects.
+vars of the same name if you share a Neon/Resend/Cloudflare account across projects.
 Clerk's two keys are the one exception — see the note in `.env.example`.
 
 ## Setting up each service
@@ -90,11 +90,37 @@ Once configured, sign in at `/admin/login`.
 Email is strictly best-effort: a missing key or a Resend error never blocks a
 waitlist signup — it just skips the email and logs why.
 
-### 4. Blog cover images — UploadThing
+### 4. Blog cover images — Cloudflare R2
 
-1. Create an app at [uploadthing.com](https://uploadthing.com) and copy the token
-   into `UPLOADTHING_TOKEN_SGA`.
-2. That's it — the admin blog editor's cover image uploader will start working.
+The app generates a short-lived presigned URL server-side (`/api/r2-upload`, admin-only)
+and the browser uploads the file directly to R2 with it — no image bytes pass through
+the Next.js server.
+
+1. Create a bucket in the [Cloudflare dashboard](https://dash.cloudflare.com) → R2
+   (or use an existing one — this project defaults to `sga-tours-bucket`).
+2. **Enable public access** on the bucket: bucket → Settings → Public access → allow
+   access via the **R2.dev subdomain**. Copy the `https://pub-xxxxxxxx.r2.dev` URL it
+   gives you into `R2_PUBLIC_URL_SGA`.
+3. **Configure CORS on the bucket** (required — without this, the browser's direct
+   PUT upload will fail): bucket → Settings → CORS policy → add a rule allowing
+   `PUT` (and `GET`) from `http://localhost:3000` and your production domain, e.g.:
+   ```json
+   [
+     {
+       "AllowedOrigins": ["http://localhost:3000", "https://sga-tours.vercel.app"],
+       "AllowedMethods": ["PUT", "GET"],
+       "AllowedHeaders": ["*"]
+     }
+   ]
+   ```
+4. Create an **R2 API token**: Cloudflare dashboard → R2 → **Manage API Tokens** →
+   Create API Token, with **Object Read & Write** permission scoped to your bucket.
+   Copy the three values it gives you into `R2_ACCOUNT_ID_SGA`, `R2_ACCESS_KEY_ID_SGA`,
+   and `R2_SECRET_ACCESS_KEY_SGA`.
+5. Set `R2_BUCKET_NAME_SGA` to your bucket's name.
+
+Only PNG/JPEG/WebP/GIF up to 4MB are accepted (enforced server-side in
+`app/api/r2-upload/route.ts`, not just in the UI).
 
 ## Project structure
 
@@ -109,7 +135,7 @@ app/
                             # app/admin/(protected)/layout.tsx + proxy.ts
   api/
     waitlist/export/       # CSV export
-    uploadthing/           # file router + route handler
+    r2-upload/             # presigned R2 upload URL, admin-only
     webhooks/clerk/        # syncs Clerk users into staff_users
 proxy.ts                  # Next 16's renamed middleware.ts — gates /admin/*
 lib/
@@ -117,7 +143,7 @@ lib/
   actions/                 # Server Actions (waitlist, blog)
   validations/             # zod schemas
   auth/requireAdmin.ts     # re-checked inside every admin action/route, not just proxy.ts
-  email/, uploadthing/, integrations/config.ts  # lazy clients + isXConfigured() checks
+  email/, r2/, integrations/config.ts  # lazy clients + isXConfigured() checks
 components/
   marketing/, hero-animation/, blog/, admin/, ui/
 ```
@@ -128,10 +154,17 @@ components/
   `proxy.ts`) among other changes — if an AI assistant or a contributor's memory of
   Next.js predates that, point them at `node_modules/next/dist/docs/` before they
   make routing/caching assumptions from an older version.
-- Every external client (Drizzle, Resend, Clerk, UploadThing) is instantiated lazily
-  behind an `isXConfigured()` check in `lib/integrations/config.ts` — never import
-  one of these clients eagerly at module scope without that guard, or you'll break
-  the "works with zero env vars" property.
+- Every external client (Drizzle, Resend, Clerk, R2) is instantiated lazily behind an
+  `isXConfigured()` check in `lib/integrations/config.ts` — never import one of these
+  clients eagerly at module scope without that guard, or you'll break the "works with
+  zero env vars" property.
+- Blog cover images used to go through UploadThing; that was replaced with Cloudflare
+  R2 (direct browser-to-R2 presigned uploads via `/api/r2-upload`) because R2 was
+  already in use for other buckets on this account. If you ever see a stray reference
+  to `isomorphic-dompurify` in git history/docs elsewhere: that was also swapped out
+  (for `sanitize-html`) after it broke blog post creation in Vercel's production
+  bundle with an `ERR_REQUIRE_ESM` error from a jsdom sub-dependency — ESM/CJS
+  interop issue, not a config problem, so don't reintroduce a jsdom-based sanitizer.
 - `npm audit` will flag a moderate advisory in `drizzle-kit`'s dev-only esbuild
   dependency — it's a local-CLI-only tool (not shipped to production), so this is
   left as-is rather than downgrading `drizzle-kit` to a much older version.

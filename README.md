@@ -16,6 +16,7 @@ in any order, as you get to them.
 npm install
 cp .env.example .env.local
 npm run dev
+
 ```
 
 Open http://localhost:3000 — the landing page, hero animation, and waitlist form UI

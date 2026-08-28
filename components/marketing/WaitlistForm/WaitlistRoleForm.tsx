@@ -21,8 +21,27 @@ import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
 import { Checkbox } from "@/components/ui/Checkbox";
 import { Combobox } from "@/components/ui/Combobox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/Select";
+import { cn } from "@/lib/utils/cn";
 
 const COUNTRY_OPTIONS = COUNTRIES.map((c) => ({ value: c.name, label: c.name }));
+
+// Short, fixed list — a plain Select (not the searchable Combobox) is the right
+// fit here, unlike the ~195-country list.
+const SOURCE_OPTIONS = [
+  "Instagram",
+  "TikTok",
+  "LinkedIn",
+  "Facebook",
+  "X (Twitter)",
+  "YouTube",
+  "Google Search",
+  "Word of Mouth / Referral",
+  "Golf Facility or Simulator Venue",
+  "Press or Article",
+  "Event or Conference",
+  "Other",
+] as const;
 
 type CommonValues = {
   name: string;
@@ -47,6 +66,10 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
 }) {
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Plain local state rather than an RHF-registered field: it's a UI-only helper
+  // that gets folded into `source` at submit time (see onSubmit), not a column of
+  // its own — keeping it out of the generic-typed form avoids fighting T's shape.
+  const [sourceOtherText, setSourceOtherText] = useState("");
   const renderedAtRef = useRef(Date.now());
   // Plain uncontrolled ref, deliberately NOT registered with react-hook-form — see
   // lib/validations/waitlist.ts for why the honeypot must stay outside client-side
@@ -64,8 +87,13 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
   async function onSubmit(values: T) {
     setStatus("idle");
     setErrorMessage(null);
+    // "Other" alone isn't useful data — substitute the free-text follow-up when
+    // they bothered to fill it in.
+    const source =
+      values.source === "Other" && sourceOtherText.trim() ? sourceOtherText.trim() : values.source;
     const result = await submitWaitlistLead({
       ...values,
+      source,
       formRenderedAt: renderedAtRef.current,
       companyWebsite: honeypotRef.current?.value ?? "",
     });
@@ -73,6 +101,7 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
       setStatus("success");
       playSwingSound();
       form.reset(defaultValues);
+      setSourceOtherText("");
       return;
     }
     setStatus("error");
@@ -158,6 +187,39 @@ export function WaitlistRoleForm<T extends FieldValues & CommonValues>({
       </div>
 
       <StateField form={form} />
+
+      <div className={cn("flex flex-col gap-1.5", form.watch("source" as Path<T>) === "Other" ? "" : "sm:col-span-2")}>
+        <Label>How did you hear about us?</Label>
+        <Controller
+          control={form.control}
+          name={"source" as Path<T>}
+          render={({ field }) => (
+            <Select value={(field.value as string) || undefined} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select one" />
+              </SelectTrigger>
+              <SelectContent>
+                {SOURCE_OPTIONS.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </div>
+
+      {form.watch("source" as Path<T>) === "Other" && (
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="sourceOtherText">Please specify</Label>
+          <Input
+            id="sourceOtherText"
+            value={sourceOtherText}
+            onChange={(e) => setSourceOtherText(e.target.value)}
+          />
+        </div>
+      )}
 
       {children(form)}
 

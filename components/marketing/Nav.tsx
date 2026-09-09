@@ -4,16 +4,17 @@ import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
-import { Button } from "@/components/ui/Button";
+import { buttonVariants } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { playSwingSound } from "@/lib/audio/swingSound";
 
-// Leading "/" matters: a bare "#how-it-works" only scrolls within the current page,
-// so from /blog (which has no such element) clicking it did nothing. "/#..." always
-// navigates home first, then scrolls to the section, from any page.
+// Leading "/join" matters: a bare "#how-it-works" only scrolls within the current
+// page, so from /blog (which has no such element) clicking it did nothing. The full
+// marketing content (and the waitlist) now lives at /join, not on the splash home
+// page, so every anchor link routes there first, then scrolls to the section.
 const links = [
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/#who-its-for", label: "Who Is it for?" },
+  { href: "/join#how-it-works", label: "How it works" },
+  { href: "/join#who-its-for", label: "Who Is it for?" },
   { href: "/blog", label: "Blog" },
 ];
 
@@ -41,9 +42,9 @@ export function Nav() {
 
         <div className="hidden items-center gap-3 md:flex">
           <ThemeToggle />
-          <Button size="sm" onClick={() => { playSwingSound(); scrollToWaitlist(); }}>
+          <Link href="/join#waitlist" className={buttonVariants({ size: "sm" })} onClick={() => playSwingSound()}>
             Join the waitlist
-          </Button>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3 md:hidden">
@@ -70,23 +71,18 @@ export function Nav() {
               {link.label}
             </Link>
           ))}
-          <Button
-            size="sm"
-            className="mt-2"
+          <Link
+            href="/join#waitlist"
+            className={buttonVariants({ size: "sm", className: "mt-2" })}
             onClick={() => {
               playSwingSound();
               setOpen(false);
-              scrollToWaitlist();
             }}
           >
             Join the waitlist
-          </Button>
+          </Link>
         </div>
       )}
     </header>
   );
-}
-
-function scrollToWaitlist() {
-  document.getElementById("waitlist")?.scrollIntoView({ behavior: "smooth" });
 }

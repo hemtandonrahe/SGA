@@ -45,7 +45,7 @@ export function SplashHero() {
 
           <div className="mt-10 flex flex-wrap items-center gap-4">
             <Link href="/join" className={buttonVariants({ size: "lg" })}>
-              Enter SGA
+              Learn more
             </Link>
             <a href="#highlights" className={buttonVariants({ variant: "ghost", size: "lg" })}>
               Keep exploring
